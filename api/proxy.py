@@ -12,7 +12,7 @@ import requests
 import json
 
 ALLOWED_HOST = "www.ravenkog.com"
-TIMEOUT      = 25   # Vercel Hobby plan caps at 10 s — keep this under
+TIMEOUT      = 9   # Vercel Hobby plan caps at 10 s — keep this under
 
 FORWARD_HEADERS = {
     "User-Agent": (
