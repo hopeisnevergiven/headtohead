@@ -2614,7 +2614,7 @@ function setLang(l){
 ═══════════════════════════════════════════════════════════════════════════════*/
 
 // Relative URL — works on any Vercel domain automatically
-const LOCAL_API = '/api/proxy';
+const LOCAL_API = 'https://too-chronic-others-brand.trycloudflare.com/api/proxy';
 
 function buildFinishedURL(name, page=0, limit=9999, search='', difficulty=''){
   return `https://www.ravenkog.com/api/players/maps?playerName=${encodeURIComponent(name)}&page=${page}&limit=${limit}&sortField=lastFinish&sortOrder=-1&search=${encodeURIComponent(search)}&difficulty=${encodeURIComponent(difficulty)}`;
