@@ -4,7 +4,7 @@ import requests
 import json
 
 ALLOWED_HOST = "www.ravenkog.com"
-TIMEOUT = 25
+TIMEOUT = 9
 
 FORWARD_HEADERS = {
     "User-Agent": (
@@ -19,16 +19,12 @@ FORWARD_HEADERS = {
 
 
 class handler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        pass
-
     def _send(self, code, body: bytes, mime="application/json"):
         self.send_response(code)
         self.send_header("Content-Type", mime)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
@@ -40,19 +36,29 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         params = parse_qs(urlparse(self.path).query)
-        url = unquote(params.get("url", [""])[0]).strip()
+        target_url = unquote(params.get("url", [""])[0]).strip()
 
-        if not url:
+        if not target_url:
             return self._error(400, "Missing ?url= parameter")
 
-        parsed = urlparse(url)
+        parsed = urlparse(target_url)
+
+        if parsed.scheme not in ("https", "http"):
+            return self._error(400, "Invalid URL scheme")
+
         if parsed.netloc != ALLOWED_HOST:
             return self._error(403, f"Only {ALLOWED_HOST} URLs are allowed")
 
         try:
-            resp = requests.get(url, headers=FORWARD_HEADERS, timeout=TIMEOUT)
-            ctype = resp.headers.get("Content-Type", "application/json")
-            self._send(resp.status_code, resp.content, ctype)
+            resp = requests.get(
+                target_url,
+                headers=FORWARD_HEADERS,
+                timeout=TIMEOUT,
+            )
+
+            content_type = resp.headers.get("Content-Type", "application/json")
+            self._send(resp.status_code, resp.content, content_type)
+
         except requests.Timeout:
             self._error(504, "ravenkog.com timed out")
         except requests.ConnectionError:
